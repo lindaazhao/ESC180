@@ -1,7 +1,8 @@
+# Problem 1: Define get_current_value()
 def get_current_value():
     return current_value
 
-##^^ new function
+# ==================================================
 
 def display_current_value():
     print("Current Value:", current_value)

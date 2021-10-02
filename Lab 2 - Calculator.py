@@ -1,3 +1,7 @@
+## Lab 2: Local and Global Variables (Calculator)
+## September 25, 2021
+## ==================================================
+
 # Problem 1 located below (line 68)
 
 # Problem 2: Display Current Value
