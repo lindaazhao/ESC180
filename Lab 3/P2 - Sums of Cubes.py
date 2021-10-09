@@ -2,7 +2,7 @@
 
 def sum_of_cubes1(n):
     '''Compute 1^3 + 2^3 + ... + n^3'''
-    global cubesum
+    # **Removed "global"s, don't need them here (and try not to use them in general)
     cubesum = 0
     for i in range(1, n+1):
         cubesum += i**3
@@ -12,7 +12,6 @@ def sum_of_cubes1(n):
 def sum_of_cubes2(n):
     '''Compute 1^3 + 2^3 + ... + n^3 using formula 
     1^3 + 2^3 + ... + n^3 = (1 + 2 + ... + n)^2'''
-    global rawsum, cubesum
     rawsum, cubesum = 0, 0
     for i in range(1, n+1):
         rawsum += (i)
@@ -30,10 +29,13 @@ def check_sum(n):
     '''Checks if the results of sum_of_cubes1 and sum_of_cubes2 match, 
     returns True/False'''
 
-    if sum_of_cubes1(n) == sum_of_cubes2(n):
-        return True
-    else:
-        return False
+    # **Can just return the boolean instead of using if/else
+    return sum_of_cubes1(n) == sum_of_cubes2(n)
+
+    # if sum_of_cubes1(n) == sum_of_cubes2(n):
+    #     return True
+    # else:
+    #     return False
 
 
 def check_sums_up_to_n(N):

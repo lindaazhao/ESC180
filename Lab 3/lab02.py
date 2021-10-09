@@ -56,6 +56,8 @@ def initialize():
     prev_value = 0
     mem_value = 0
 
+# **Just for fun to see what it prints when imported to test_calc.py
+print(__name__)
 
 if __name__ == '__main__':
 
