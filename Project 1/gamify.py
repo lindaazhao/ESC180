@@ -1,7 +1,8 @@
 def initialize():
-    '''Initializes the global variables needed for the simulation.
-    Note: this function is incomplete, and you may want to modify it'''
+    '''Initializes the global variables needed for the simulation.'''
     
+    # Stores the current number of hedons, health the user has
+    # Integer >= 0
     global cur_hedons, cur_health
 
     global cur_time
@@ -24,7 +25,8 @@ def initialize():
     last_activity_duration = 0
     
     cur_time = 0
-    prev_activity_time = 0
+    prev_activity_time = 0  # The most recent time (provided by cur_time) at
+    #                       # which textbooks or running was performed
     is_tired = False
     
     last_finished = -1000
@@ -37,7 +39,8 @@ def star_can_be_taken(activity):
 
     
 def perform_activity(activity, duration):
-    '''Simulate the user performing <activity> for <duration> minutes. duration is a positive int'''
+    '''Simulate the user performing <activity> for <duration> minutes. 
+    <duration> is a positive int'''
 
     global cur_health, cur_hedons
     global last_activity, last_activity_duration
@@ -45,13 +48,13 @@ def perform_activity(activity, duration):
     global cur_time
 
     if activity == "running":
-        # Health points calculations; 3 HP / min for duration <= 180, 1 HP / min for duration > 180
+        # Health points: 3 HP / min for duration <= 180, 1 HP / min for each min of duration > 180
         if duration <= 180:
             cur_health += 3 * duration
         if duration > 180:
             cur_health += (3 * 180) + (3 * duration - 180)
 
-        # Hedon points calculation: 
+        # Hedon points 
         if cur_star and cur_star_activity == "running":
             if duration <= 10:
                 cur_hedons += 2 * duration
@@ -62,13 +65,14 @@ def perform_activity(activity, duration):
         last_activity = "running"
 
     if activity == "textbooks":
-        pass
+        # Health points: Always 2 HP / min
+        cur_health += 2 * duration
+
+        # Hedon points
+        last_activity = "textbooks"
 
     if activity == "resting":
-        pass
-
-    else:
-        pass
+        last_activity = "resting"
 
     cur_time += duration
     last_activity_duration = duration
@@ -80,7 +84,9 @@ def get_cur_health():
     pass
     
 def offer_star(activity):
-    '''stars not given for resting, 2 stars not given at once'''
+    '''Simulate offering the user a star for <activity>.
+    Stars not given for resting, 2 stars not given at once.
+    Assume <activity> is "running", "textbooks", or "resting".'''
     pass
         
 def most_fun_activity_minute():
