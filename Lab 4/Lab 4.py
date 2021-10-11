@@ -89,7 +89,7 @@ print(approx_pi(6))
 # Euclids algorithm: Given two numbers not prime to one another, to find their greatest common factor
 # If A = 0 then GCD(A,B)=B, since the GCD(0,B)=B, and we can stop.
 # If B = 0 then GCD(A,B)=A, since the GCD(A,0)=A, and we can stop.
-# Write A in quotient remainder form (A = B⋅Q + R)
+# Write A in quotient remainder form (A = B*Q + R)
 # Find GCD(B,R) using the Euclidean Algorithm since GCD(A,B) = GCD(B,R)
 
 def euclids_alg(a,b):
