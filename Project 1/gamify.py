@@ -78,23 +78,43 @@ def perform_activity(activity, duration):
     last_activity_duration = duration
 
 def get_cur_hedons():
-    pass
+    return cur_hedons
     
 def get_cur_health():
-    pass
+    return cur_health
     
 def offer_star(activity):
     '''Simulate offering the user a star for <activity>.
     Stars not given for resting, 2 stars not given at once.
     Assume <activity> is "running", "textbooks", or "resting".'''
-    pass
+    global cur_health, cur_hedons
+    global last_activity, last_activity_duration
+    global cur_star, cur_star_activity
+    global cur_time
+    
+    if last_activity == cur_star_ activity:
+        print("No stars can be offered in the middle of ", cur_star_activity," !")
         
+    
+    if activity == "resting":
+         print("No stars offered for resting!")
+         
+
+    While last_activity != cur_star_activity and bored_with_stars == False:
+        
+        if cur_star >= 3:
+            bored_with_stars = True
+
+        
+    if bored_with_stars == True:
+        cur_hedons = 0
+        print("No more hedons! 3 stars in 2 hours!")    
+   
 def most_fun_activity_minute():
     pass
     
 ################################################################################
-#These functions are not required, but we recommend that you use them anyway
-#as helper functions
+#These functions are not required, but we recommend that you use them anyway as helper functions
 
 def get_effective_minutes_left_hedons(activity):
     '''Return the number of minutes during which the user will get the full
