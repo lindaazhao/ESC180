@@ -9,6 +9,9 @@ def initialize():
     # Integer >= 0
     global cur_time
 
+    # Stores the last activity that was performed and its duration
+    global last_activity, last_activity_duration
+
     # Stores the most recent time (provided by cur_time) at which textbooks 
     # or running was performed
     # None to begin, integer > 0 after first activity is performed
@@ -29,7 +32,9 @@ def initialize():
 
     # Stores the value of these variables at a certain point in the simulation
     # so they can be recalled and used later
-    global save_star_activity, save_cur_hedons, save_cur_health
+    global save_star_activity, save_cur_hedons, save_cur_health, save_cur_time
+    global save_last_activity, save_last_activity_duration
+    global save_prev_tiring_activity_time
     
     cur_hedons = 0
     cur_health = 0
@@ -39,6 +44,9 @@ def initialize():
     star_times = []
     bored_with_stars = False
     
+    last_activity = None
+    last_activity_duration = 0
+
     cur_time = 0
     prev_tiring_activity_time = None   
     
@@ -64,10 +72,8 @@ def perform_activity(activity, duration):
     Return None.
     Assume <duration> is a positive int.'''
 
-    global cur_health, cur_hedons
+    global cur_star_activity, cur_hedons, cur_health, cur_time
     global last_activity, last_activity_duration, prev_tiring_activity_time
-    global cur_star_activity
-    global cur_time
 
     # Nothing happens if <activity> is not one of the 3 listed activities.
     if activity == "running" or \
@@ -75,12 +81,20 @@ def perform_activity(activity, duration):
         activity == "textbooks":
 
         if activity == "running":
+            # Set the duration for which running will give maximum HP points
+            max_hp_running_duration = 180
+
+            if last_activity == "running":
+                # Change above variable to account for previous running duration
+                max_hp_running_duration -= last_activity_duration
+
             # Health points: 3 HP / min for duration <= 180
             # 1 HP / min for each min of duration > 180
-            if duration <= 180:
+            if duration <= max_hp_running_duration:
                 cur_health += 3 * duration
-            if duration > 180:
-                cur_health += (3 * 180) + (duration - 180)
+            else:
+                cur_health += (3 * max_hp_running_duration) + \
+                    (duration - max_hp_running_duration)
 
             # Hedons: 2 / min for duration <= 10, 
             # -2 / min for each min of duration > 10, -2 / min if tired
@@ -109,6 +123,8 @@ def perform_activity(activity, duration):
         if star_can_be_taken(activity):
             cur_hedons += 3 * min(duration, 10)
 
+        last_activity = activity
+        last_activity_duration = duration
         cur_star_activity = None
         cur_time += duration
         if activity == "running" or activity == "textbooks":
@@ -150,30 +166,46 @@ def offer_star(activity):
 
 
 def save_current_state():
-    '''Save the current state of the simulation in terms of 
-    cur_star_activity, cur_hedons, and cur_health'''
-    global cur_star_activity, cur_hedons, cur_health
-    global save_star_activity, save_cur_hedons, save_cur_health
+    '''Save the current state of the simulation variables used in 
+    perform_activity()'''
+    global cur_star_activity, cur_hedons, cur_health, cur_time
+    global last_activity, last_activity_duration, prev_tiring_activity_time
 
-    # Save the activity a star was most recently offered for
+    global save_star_activity, save_cur_hedons, save_cur_health, save_cur_time
+    global save_last_activity, save_last_activity_duration
+    global save_prev_tiring_activity_time
+
+    # Save current state of variables in new memory variables
     save_star_activity = cur_star_activity
-    # Save the current # of hedons the user has
     save_cur_hedons = cur_hedons
-    # Save the current # of health points the user has
     save_cur_health = cur_health
+    save_cur_time = cur_time
+
+    save_last_activity = last_activity
+    save_last_activity_duration = last_activity_duration
+    save_prev_tiring_activity_time = prev_tiring_activity_time
 
 
-def reset_minute_activity():
+def recall_saved_state():
     '''Reset simulation variables to the previous state saved by 
     save_current_state()'''
-    global cur_star_activity, cur_hedons, cur_health
-    global save_star_activity, save_cur_hedons, save_cur_health
+    global cur_star_activity, cur_hedons, cur_health, cur_time
+    global last_activity, last_activity_duration, prev_tiring_activity_time
 
-    # Reset cur_star_activity, cur_hedons and cur_health to previously saved 
+    global save_star_activity, save_cur_hedons, save_cur_health, save_cur_time
+    global save_last_activity, save_last_activity_duration
+    global save_prev_tiring_activity_time
+
+    # Reset all variables (modified by perform_activity()) to previously saved 
     # state using save_current_state()
     cur_star_activity = save_star_activity
     cur_hedons = save_cur_hedons
-    cur_health = save_cur_health   
+    cur_health = save_cur_health 
+    cur_time = save_cur_time
+
+    last_activity = save_last_activity
+    last_activity_duration = save_last_activity_duration
+    prev_tiring_activity_time = save_prev_tiring_activity_time
 
    
 def most_fun_activity_minute():
@@ -185,11 +217,11 @@ def most_fun_activity_minute():
     # Calculate hedons gained from 1 min of running
     running_hedons = cur_hedons - save_cur_hedons
     # Reset simulation to previous state, before 1 minute of running
-    reset_minute_activity() 
+    recall_saved_state() 
 
     perform_activity("textbooks", 1)
     textbooks_hedons = cur_hedons - save_cur_hedons
-    reset_minute_activity()
+    recall_saved_state()
 
     resting_hedons = 0 # Resting always provides 0 hedons
 
@@ -209,8 +241,10 @@ if __name__ == '__main__':
     print(get_cur_health())            # 90 = 30 * 3                          # Test 2           		
     print(most_fun_activity_minute())  # resting                              # Test 3
     perform_activity("resting", 30)    
-    offer_star("running")              
+    offer_star("running")
+    print(cur_time)                    # 60 (minutes) = 30 + 30
     print(most_fun_activity_minute())  # running                              # Test 4
+    print(cur_time)                    # 60 (minutes) = 30 + 30
     perform_activity("textbooks", 30)  
     print(get_cur_health())            # 150 = 90 + 30*2                      # Test 5
     print(get_cur_hedons())            # -80 = -20 + 30 * (-2)                # Test 6
@@ -219,7 +253,7 @@ if __name__ == '__main__':
     print(get_cur_health())            # 210 = 150 + 20 * 3                   # Test 7
     print(get_cur_hedons())            # -90 = -80 + 10 * (3-2) + 10 * (-2)   # Test 8
     perform_activity("running", 170)
-    print(get_cur_health())            # 720 = 210 + 170 * 3                  # Test 9
+    print(get_cur_health())            # 700 = 210 + 160 * 3 + 10 * 1         # Test 9
     print(get_cur_hedons())            # -430 = -90 + 170 * (-2)              # Test 10
     
     
