@@ -265,7 +265,7 @@ if __name__ == '__main__':
     print(get_cur_hedons())            # -830 = -630 + 100 * (-2)
     print(most_fun_activity_minute())
 
-    # Test Set #2
+    # Test Set #2 - Test for getting bored of stars
     initialize()
     print("Test Set 2 ==========================")
     perform_activity("textbooks", 10)
@@ -283,5 +283,3 @@ if __name__ == '__main__':
     perform_activity("textbooks", 10)
     print(get_cur_health())            # 80 = 60 + 10 * 2
     print(get_cur_hedons())            # 10 = 30 + 10 * (-2)
-    
-    
