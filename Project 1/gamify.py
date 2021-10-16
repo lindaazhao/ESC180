@@ -59,8 +59,7 @@ def is_tired():
             
 
 def star_can_be_taken(activity):
-    '''Return True iff a star can be used to boost hedons for <activity>,
-    otherwise return False.
+    '''Return True iff a star can be used to boost hedons for <activity>.
     Assume <activity> is "running" or "textbooks".'''
     # FAQ 1.6: Assume stars will not be given for resting.
     return cur_star_activity == activity and not bored_with_stars and \
@@ -71,22 +70,26 @@ def perform_activity(activity, duration):
     '''Simulate the user performing <activity> for <duration> minutes. 
     Return None.
     Assume <duration> is a positive int.'''
-
     global cur_star_activity, cur_hedons, cur_health, cur_time
     global last_activity, last_activity_duration, prev_tiring_activity_time
 
-    # Nothing happens if <activity> is not one of the 3 listed activities.
+    # Nothing happens if <activity> is not one of the 3 listed activities
     if activity == "running" or \
         activity == "resting" or \
         activity == "textbooks":
 
         if activity == "running":
-            # Set the duration for which running will give maximum HP points
+            # Set the duration for which running will give max (3/min) HP points
             max_hp_running_duration = 180
 
             if last_activity == "running":
-                # Change above variable to account for previous running duration
-                max_hp_running_duration -= last_activity_duration
+                # Change max_hp.. variable to account for prev. running duration
+                if last_activity_duration <= 180:
+                    max_hp_running_duration -= last_activity_duration
+                else: # Prev. running duration > 180
+                    max_hp_running_duration = 0
+            else:
+                last_activity_duration = 0 # Reset if last_activity not running
 
             # Health points: 3 HP / min for duration <= 180
             # 1 HP / min for each min of duration > 180
@@ -124,8 +127,8 @@ def perform_activity(activity, duration):
             cur_hedons += 3 * min(duration, 10)
 
         last_activity = activity
-        last_activity_duration = duration
-        cur_star_activity = None
+        last_activity_duration += duration # Sum in case of 3+ consec. running
+        cur_star_activity = None # Reset offered star after any activity
         cur_time += duration
         if activity == "running" or activity == "textbooks":
             prev_tiring_activity_time = cur_time
@@ -153,8 +156,7 @@ def offer_star(activity):
     global bored_with_stars
 
     cur_star_activity = activity
-    # Document the time the star was offered
-    star_times.append(cur_time)
+    star_times.append(cur_time) # Document the time the star was offered
 
     # Check if the user is bored with stars (i.e. 3+ stars have been 
     # offered within 120 min) and update star_times
@@ -244,7 +246,7 @@ if __name__ == '__main__':
     offer_star("running")
     print(cur_time)                    # 60 (minutes) = 30 + 30
     print(most_fun_activity_minute())  # running                              # Test 4
-    print(cur_time)                    # 60 (minutes) = 30 + 30
+    print(cur_time)                    # 60 (minutes) = 30 + 30, test for game state reset
     perform_activity("textbooks", 30)  
     print(get_cur_health())            # 150 = 90 + 30*2                      # Test 5
     print(get_cur_hedons())            # -80 = -20 + 30 * (-2)                # Test 6
@@ -255,5 +257,31 @@ if __name__ == '__main__':
     perform_activity("running", 170)
     print(get_cur_health())            # 700 = 210 + 160 * 3 + 10 * 1         # Test 9
     print(get_cur_hedons())            # -430 = -90 + 170 * (-2)              # Test 10
+    perform_activity("running", 100)
+    print(get_cur_health())            # 800 = 700 + 100 * 1
+    print(get_cur_hedons())            # -630 = -430 + 100 * (-2)
+    perform_activity("running", 100)
+    print(get_cur_health())            # 900 = 800 + 100 * 1
+    print(get_cur_hedons())            # -830 = -630 + 100 * (-2)
+    print(most_fun_activity_minute())
+
+    # Test Set #2
+    initialize()
+    print("Test Set 2 ==========================")
+    perform_activity("textbooks", 10)
+    print(get_cur_health())             # 20 = 10 * 2    
+    print(get_cur_hedons())             # 10 = 10 * 1
+    offer_star("textbooks")
+    perform_activity("textbooks", 10)
+    print(get_cur_health())             # 40 = 20 + 10 * 2
+    print(get_cur_hedons())             # 20 = 10 + 1 * 10
+    offer_star("textbooks")
+    perform_activity("textbooks", 10)
+    print(get_cur_health())            # 60 = 40 + 10 * 2
+    print(get_cur_hedons())            # 30 = 20 + 10 * 1 
+    offer_star("textbooks") # User should be bored with stars now
+    perform_activity("textbooks", 10)
+    print(get_cur_health())            # 80 = 60 + 10 * 2
+    print(get_cur_hedons())            # 10 = 30 + 10 * (-2)
     
     
