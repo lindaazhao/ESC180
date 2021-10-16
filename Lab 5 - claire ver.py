@@ -97,5 +97,21 @@ M1 = [[4,5,6],
 
 print(mult_M_v(M1, v1))
 
+#4c
+M1 = [[0, 3, 5],
+      [5, 5, 2]]
+M2 = [[3, 4],
+      [3, -2],
+      [4, -2]]
+
+def matric_multiplication(M1,M2):
+    if len(M1[1]) == len(M2): #4a 1num_columns = 2num_rows
+        for i in range(len(M1)): #1num_rows
+            for j in range(len(M2[1])): #2numcolumns
+                prod = M1[i][j]*M2[j][i]
+                print(prod)
+
+
+matric_multiplication(M1,M2)
 
 
