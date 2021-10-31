@@ -7,6 +7,8 @@
 '''
 
 import random
+# Minimax optimization
+# Breadth first / depth first
 
 # ==================================================
 # Problem 1 (a)
@@ -59,9 +61,10 @@ def is_col_all_marks(board, col_i, mark):
 # Problem 3 (c)
 def is_win(board, mark):
     for i in range(3):
-        if is_row_all_marks(board, i, mark) == True or \
-            is_col_all_marks(board, i, mark) == True: 
+        if is_row_all_marks(board, i, mark) or \
+            is_col_all_marks(board, i, mark): 
                 return True
+    # Check diagonals
     if board[0][0] == board[1][1] == board[2][2] == mark or \
         board[0][2] == board[1][1] == board [2][0] == mark:
             return True
@@ -80,7 +83,7 @@ def make_winning_move(board, mark):
         square_num = free_squares[i]
         # print(square_num)
         put_in_board_w_coord(board, mark, square_num)
-        if is_win(board, mark) == True:
+        if is_win(board, mark):
             return square_num
         else:
             put_in_board_w_coord(board, " ", square_num)
@@ -89,7 +92,6 @@ def make_winning_move(board, mark):
 
 # Problem 4 (b)
 def block_opponent_win(board, mark):
-    free_squares = get_free_squares(board)
     X_winning_move = make_winning_move(board, "X")
 
     if X_winning_move is not None:
