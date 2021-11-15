@@ -9,19 +9,6 @@ def is_empty(board):
                 return False
     return True
 
-
-def is_full(board):
-    '''Return True iff all spaces on board <board> are full'''
-    board_height = len(board)
-    board_width = len(board[0])
-
-    for i in range(board_height):
-        for j in range(board_width):
-            if board[i][j] == " ":
-                return False
-    return True
-
-    
     
 def is_bounded(board, y_end, x_end, length, d_y, d_x):
     '''Return whether a sequence of length <length> is 
@@ -31,9 +18,10 @@ def is_bounded(board, y_end, x_end, length, d_y, d_x):
     start_y = y_end - d_y*(length-1)
     start_x = x_end - d_x*(length-1)
 
-    if start_y - d_y < 0 or start_x - d_x < 0 or start_x - d_x >= len(board[0]): # Starts at edge in relevant direction
+    # Check if sequence starts at board edge in relevant direction
+    if start_y - d_y < 0 or start_x - d_x < 0 or start_x - d_x >= len(board[0]): 
         start_seq = "E"
-    else:
+    else: # If not at board edge
         start_seq = board[start_y - d_y][start_x - d_x]
 
     if y_end + d_y > len(board) - 1 or x_end + d_x > len(board[0]) - 1: # Edge
@@ -41,20 +29,20 @@ def is_bounded(board, y_end, x_end, length, d_y, d_x):
     else:
         end_seq = board[y_end + d_y][x_end + d_x]
 
-    # print("IS BOUNDED, Start:", start_seq, "End:", end_seq) # TEST, remove this after
-
     if start_seq == " " and end_seq == " ":
         return "OPEN"
     elif start_seq == " " or end_seq == " ":
-        if start_seq != board[start_y][start_x] and end_seq != board[start_y][start_x]:
+        # Check that sequence is complete
+        if start_seq != board[y_end][x_end] and end_seq != board[y_end][x_end]:
             return "SEMIOPEN"
+        return None # If sequence is incomplete
     else:
         return "CLOSED"
 
-    
+
 def detect_row(board, col, y_start, x_start, length, d_y, d_x):
     '''Return a tuple whose first element is # of open sequences of <col>
-    and <length> in the row R, and whose second element is the # of 
+    and <length> in given row, and whose second element is the # of 
     semi-open sequences of <col> and <length>. 
     Assume y_start, x_start is at the edge of the board'''
     open_seq_count, semi_open_seq_count = 0, 0
@@ -133,7 +121,98 @@ def search_max(board):
                 board[y][x] = " " # Reset board after score and move are saved
 
     return move_y, move_x
+
     
+def is_win(board):
+    '''Return current status of the game; one of 
+    ["White won", "Black won", "Draw", "Continue playing"]'''
+    
+    # Check open & semi-open wins
+    white_open_win, white_semi_open_win = detect_rows(board, "w", 5)
+    black_open_win, black_semi_open_win = detect_rows(board, "b", 5)
+    # Check closed wins
+    white_closed_win = detect_closed_rows(board, "w", 5)
+    black_closed_win = detect_closed_rows(board, "b", 5)
+
+    if white_open_win > 0 or white_semi_open_win > 0 or white_closed_win > 0:
+        return "White won"
+    elif black_open_win > 0 or black_semi_open_win > 0 or black_closed_win > 0:
+        return "Black won"
+    else:
+        if is_full(board):
+            return "Draw"
+        return "Continue playing"
+
+
+# ======================================================================
+# Functions for is_win(board)
+def detect_closed_row(board, col, y_start, x_start, length, d_y, d_x):
+    '''Return # of closed sequences of <col> and <length> in the row defined 
+    by d_y and d_x'''
+    closed_seq_count, cur_seq_length = 0, 0
+    cur_y = y_start
+    cur_x = x_start
+
+    while 0 <= cur_y < len(board) and 0 <= cur_x < len(board[0]):
+        if board[cur_y][cur_x] == col: 
+            cur_seq_length += 1 
+            if cur_seq_length == length:
+                y_end = cur_y # Set endpoints for is_bounded()
+                x_end = cur_x
+
+                # Increment counter if sequence is closed
+                if is_bounded(board, y_end, x_end, length, d_y, d_x) == "CLOSED":
+                    closed_seq_count += 1
+        else: # If current coord != colour
+            cur_seq_length = 0
+        cur_y += d_y # Check next coordinate in direction next loop
+        cur_x += d_x
+
+    return closed_seq_count
+
+
+def detect_closed_rows(board, col, length):
+    '''Return # of closed sequences on <board> of <col> and <length>'''
+    closed_seq_count = 0
+
+    for y in range(len(board)): 
+        # Check every row
+        closed_0_1 = detect_closed_row(board, col, y, 0, length, 0, 1)
+        # Check lower left half of 1,1 diagonals
+        closed_1_1 = detect_closed_row(board, col, y, 0, length, 1, 1)
+        # Check lower right half of 1,-1 diagonals
+        closed_1_neg1 = detect_closed_row(board, col, y, len(board[0])-1, length, 1, -1)
+
+        closed_seq_count += closed_0_1 + closed_1_1 + closed_1_neg1
+
+    for x in range(len(board[0])): 
+        # Check every column 
+        closed_1_0 = detect_closed_row(board, col, 0, x, length, 1, 0)
+        # Check upper right half of 1,1 diagonals
+        if x > 0:
+            closed_1_1 = detect_closed_row(board, col, 0, x, length, 1, 1)
+        # Check upper left half of 1,-1 diagonals
+        if x < len(board[0]) - 1:
+            closed_1_neg1 = detect_closed_row(board, col, 0, x, length, 1, -1)
+    
+        closed_seq_count += closed_1_0 + closed_1_1 + closed_1_neg1
+
+    return closed_seq_count
+
+
+def is_full(board):
+    '''Return True iff all spaces on board <board> are full'''
+    board_height = len(board)
+    board_width = len(board[0])
+
+    for i in range(board_height):
+        for j in range(board_width):
+            if board[i][j] == " ":
+                return False
+    return True
+
+
+# ======================================================================
 def score(board):
     '''Calculate overall score (b & w) for the board'''
     MAX_SCORE = 100000
@@ -162,26 +241,6 @@ def score(board):
             50   * open_b[3]                     + 
             10   * semi_open_b[3]                +  
             open_b[2] + semi_open_b[2] - open_w[2] - semi_open_w[2])
-
-    
-def is_win(board):
-    '''Return current status of the game; one of 
-    ["White won", "Black won", "Draw", "Continue playing"]'''
-    
-    # Check open & semi-open wins
-    white_open_win, white_semi_open_win = detect_rows(board, "w", 5)
-    black_open_win, black_semi_open_win = detect_rows(board, "b", 5)
-    white_closed_win = 0 # CHANGE THESE
-    black_closed_win = 0
-
-    if white_open_win > 0 or white_semi_open_win > 0 or white_closed_win > 0:
-        return "White won"
-    elif black_open_win > 0 or black_semi_open_win > 0 or black_closed_win > 0:
-        return "Black won"
-    else:
-        if is_full(board):
-            return "Draw"
-        return "Continue playing"
 
 
 def print_board(board):
@@ -261,7 +320,7 @@ def put_seq_on_board(board, y, x, d_y, d_x, length, col):
         x += d_x
 
 # ======================================================================
-# Test Cases for Specific Functions
+# Test Cases for Main Functions
 def test_is_empty():
     board  = make_empty_board(8)
     if is_empty(board):
@@ -323,6 +382,7 @@ def easy_testset_for_main_functions():
     test_search_max()
 
 # ======================================================================
+# More Tests to ensure things are detecting correctly
 def some_tests():
     board = make_empty_board(8)
 
@@ -439,9 +499,7 @@ def some_tests():
     #        Semi-open rows of length 5: 0
 
 
-  
-            
 if __name__ == '__main__':
-    # play_gomoku(8)
-    some_tests()
+    play_gomoku(8)
+    # easy_testset_for_main_functions()
     
