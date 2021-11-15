@@ -23,15 +23,17 @@ def is_bounded(board, y_end, x_end, length, d_y, d_x):
     start_y = y_end - d_y*(length-1)
     start_x = x_end - d_x*(length-1)
 
-    if start_y == 0 or start_x == 0: # Starts in a corner of the board
+    if start_y - d_y < 0 or start_x - d_x < 0: # Starts in a corner of the board
         start_seq = "E"
     else:
         start_seq = board[start_y - d_y][start_x - d_x]
 
-    if y_end == len(board) - 1 or x_end == len(board[0]) - 1: # Corner
+    if y_end + d_y > len(board) - 1 or x_end + d_x > len(board[0]) - 1: # Corner
         end_seq = "E"
     else:
         end_seq = board[y_end + d_y][x_end + d_x]
+
+    print("IS BOUNDED", start_seq, end_seq)
 
     if start_seq == " " and end_seq == " ":
         return "OPEN"
@@ -131,39 +133,40 @@ def detect_rows(board, col, length):
     for y in range(len(board)): 
         # Check every row
         open_0_1, semi_open_0_1 = detect_row(board, col, y, 0, length, 0, 1)
+        print("Row", y, open_0_1)
         
-        # Check lower half 1,1 diagonals
-        cur_1_1, cur_semi_1_1 = detect_row(board, col, y, 0, length, 1, 1)
-        open_1_1 += cur_1_1
-        semi_open_1_1 += cur_semi_1_1
+        # # Check lower half 1,1 diagonals
+        # cur_1_1, cur_semi_1_1 = detect_row(board, col, y, 0, length, 1, 1)
+        # open_1_1 += cur_1_1
+        # semi_open_1_1 += cur_semi_1_1
         
-        # Check lower half 1,-1 diagonals
-        cur_1_neg1, cur_semi_1_neg1 = detect_row(board, col, y, len(board[0])-1, length, 1, -1)
-        open_1_neg1 += cur_1_neg1
-        semi_open_1_neg1 += cur_semi_1_neg1
+        # # Check lower half 1,-1 diagonals
+        # cur_1_neg1, cur_semi_1_neg1 = detect_row(board, col, y, len(board[0])-1, length, 1, -1)
+        # open_1_neg1 += cur_1_neg1
+        # semi_open_1_neg1 += cur_semi_1_neg1
 
-        open_seq_count += (open_0_1 + open_1_1 + open_1_neg1)
-        semi_open_seq_count += (semi_open_0_1 + semi_open_1_1 + semi_open_1_neg1)
+        open_seq_count += open_0_1
+        semi_open_seq_count += semi_open_0_1
 
         
     
     for x in range(len(board[0])): 
         # Check every column 
         open_1_0, semi_open_1_0 = detect_row(board, col, 0, x, length, 1, 0)
-        if x != 0:
-            # Check upper half 1,1 diagonals
-            cur_1_1, cur_semi_1_1 = detect_row(board, col, 0, x, length, 1, 1)
-            open_1_1 += cur_1_1
-            semi_open_1_1 += cur_semi_1_1
+        # if x != 0:
+        #     # Check upper half 1,1 diagonals
+        #     cur_1_1, cur_semi_1_1 = detect_row(board, col, 0, x, length, 1, 1)
+        #     open_1_1 += cur_1_1
+        #     semi_open_1_1 += cur_semi_1_1
 
-        if x != len(board[0])-1:
-            # Check upper half 1,-1 diagonals
-            cur_1_neg1, cur_semi_1_neg1 = detect_row(board, col, 0, x, length, 1, -1)
-            open_1_neg1 += cur_1_neg1
-            semi_open_1_neg1 += cur_semi_1_neg1
+        # if x != len(board[0])-1:
+        #     # Check upper half 1,-1 diagonals
+        #     cur_1_neg1, cur_semi_1_neg1 = detect_row(board, col, 0, x, length, 1, -1)
+        #     open_1_neg1 += cur_1_neg1
+        #     semi_open_1_neg1 += cur_semi_1_neg1
 
-        open_seq_count += (open_1_0 + open_1_1 + open_1_neg1)
-        semi_open_seq_count += (semi_open_1_0 + semi_open_1_1 + semi_open_1_neg1)
+        open_seq_count += open_1_0
+        semi_open_seq_count += semi_open_1_0
     
 
 
@@ -183,8 +186,11 @@ def test_detect_rows():
     board = make_empty_board(8)
     x = 5; y = 1; d_x = 0; d_y = 1; length = 3; col = 'w'
     put_seq_on_board(board, y, x, d_y, d_x, length, "w")
-    put_seq_on_board(board, 2, 2, 1, 1, 3, 'w')
+    put_seq_on_board(board, 5, 2, 0, 1, 3, 'w')
+    put_seq_on_board(board, 0, 3, 0, 1, 3, 'w')
     print_board(board)
+    print("Detect Row", detect_row(board, col, 0, 3, 3, 0, 1))
+    print(detect_rows(board, col, length))
     if detect_rows(board, col,length) == (2,0):
         print("TEST CASE for detect_rows PASSED")
     else:

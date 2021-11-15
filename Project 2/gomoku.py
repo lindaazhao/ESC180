@@ -15,18 +15,20 @@ def is_bounded(board, y_end, x_end, length, d_y, d_x):
     "OPEN", "SEMIOPEN", or "CLOSED"'''
 
     # Set y, x variables for first tile in sequence
-    start_y = y_end - d_y*(length - 1)
-    start_x = x_end - d_x*(length - 1)
+    start_y = y_end - d_y*(length-1)
+    start_x = x_end - d_x*(length-1)
 
-    if start_y == 0 or start_x == 0: # Starts in a corner of the board
+    if start_y - d_y < 0 or start_x - d_x < 0: # Starts at edge in relevant direction
         start_seq = "E"
     else:
         start_seq = board[start_y - d_y][start_x - d_x]
 
-    if y_end == len(board) - 1 or x_end == len(board[0]) - 1: # Corner
+    if y_end + d_y > len(board) - 1 or x_end + d_x > len(board[0]) - 1: # Edge
         end_seq = "E"
     else:
         end_seq = board[y_end + d_y][x_end + d_x]
+
+    print("IS BOUNDED", start_seq, end_seq)
 
     if start_seq == " " and end_seq == " ":
         return "OPEN"
@@ -70,17 +72,22 @@ def detect_rows(board, col, length):
     '''Return a tuple, whose first element is # of open sequences of <col> and
     <length>, and whose second element is # of semi-open
     sequences of <col> and <length> on the entire board.'''
-    ####CHANGE ME
     open_seq_count, semi_open_seq_count = 0, 0
 
-    for y in range(len(board)):
-        for x in range(len(board[0])):
-            open_0_1, semi_open_0_1 = detect_row(board, col, y, x, length, 0, 1)
-            open_1_0, semi_open_1_0 = detect_row(board, col, y, x, length, 1, 0)
-            open_1_1, semi_open_1_1 = detect_row(board, col, y, x, length, 1, 1)
-            open_1_neg1, semi_open_1_neg1 = detect_row(board, col, y, x, length, 1, -1)
-            open_seq_count += (open_0_1 + open_1_0 + open_1_1 + open_1_neg1)
-            semi_open_seq_count += (semi_open_0_1 + semi_open_1_0 + semi_open_1_1 + semi_open_1_neg1)
+    for y in range(len(board)): 
+        # Check every row
+        open_0_1, semi_open_0_1 = detect_row(board, col, y, 0, length, 0, 1)
+        print("Row", y, open_0_1)
+
+        open_seq_count += open_0_1
+        semi_open_seq_count += semi_open_0_1
+
+    for x in range(len(board[0])): 
+        # Check every column 
+        open_1_0, semi_open_1_0 = detect_row(board, col, 0, x, length, 1, 0)
+
+        open_seq_count += open_1_0
+        semi_open_seq_count += semi_open_1_0
 
     return open_seq_count, semi_open_seq_count
     
