@@ -7,8 +7,10 @@
 '''
 
 import random
+# Minimax optimization
+# Breadth first / depth first
 
-
+# ==================================================
 # Problem 1 (a)
 def move_coord(square_num):
     '''square_num is an integer between 1 and 9'''
@@ -21,8 +23,11 @@ def put_in_board(board, mark, square_num):
     coord = move_coord(square_num)
     board[coord[0]][coord[1]] = mark
 
+
+# ==================================================
 # Problem 2 (a)
 def get_free_squares(board):
+    '''Return a list containing the coordinates of the free squares in the board.'''
     free_squares = []
     for i in range(3):
         for j in range(3):
@@ -34,30 +39,70 @@ def get_free_squares(board):
 
 # Problem 2 (b)
 def make_random_move(board, mark):
-    num_free_squares = len(get_free_squares(board)) # Fix this
-    print(num_free_squares)
+    '''Find a random free square in board and put mark in that square.'''
     free_squares = get_free_squares(board)
-    print(free_squares)
-    coord = free_squares[int((num_free_squares + 1) * random.random())] # Fix this
+    num_free_squares = len(free_squares)
+    random__index = int(num_free_squares * random.random())
+    coord = free_squares[random__index]
     board[coord[0]][coord[1]] = mark
 
+
+# ==================================================
+# Problem 3 (a)
 def is_row_all_marks(board, row_i, mark):
     return board[row_i][0] == board[row_i][1] == board[row_i][2] == mark
 
+
+# Problem 3 (b)
 def is_col_all_marks(board, col_i, mark):
     return board[0][col_i] == board[1][col_i] == board[2][col_i] == mark
 
+
+# Problem 3 (c)
 def is_win(board, mark):
     for i in range(3):
-        if is_row_all_marks(board, i, mark) == True or \
-            is_col_all_marks(board, i, mark) == True: 
+        if is_row_all_marks(board, i, mark) or \
+            is_col_all_marks(board, i, mark): 
                 return True
+    # Check diagonals
     if board[0][0] == board[1][1] == board[2][2] == mark or \
         board[0][2] == board[1][1] == board [2][0] == mark:
             return True
     return False
 
 
+# ==================================================
+# Problem 4 (a)
+def put_in_board_w_coord(board, mark, coord):
+    board[coord[0]][coord[1]] = mark
+
+
+def make_winning_move(board, mark):
+    free_squares = get_free_squares(board)
+    for i in range(len(free_squares)):
+        square_num = free_squares[i]
+        # print(square_num)
+        put_in_board_w_coord(board, mark, square_num)
+        if is_win(board, mark):
+            return square_num
+        else:
+            put_in_board_w_coord(board, " ", square_num)
+    return None
+
+
+# Problem 4 (b)
+def block_opponent_win(board, mark):
+    X_winning_move = make_winning_move(board, "X")
+
+    if X_winning_move is not None:
+        put_in_board_w_coord(board, mark, X_winning_move)
+        return X_winning_move
+    else:
+        return None
+
+
+# ==================================================
+# Starter functions
 def print_board_and_legend(board):
     for i in range(3):
         # First board
@@ -69,69 +114,20 @@ def print_board_and_legend(board):
         # Print line separators
         if i < 2:
             print("---+---+---" + " "*5 + "---+---+---")
-        
-    
+
 def make_empty_board():
     board = []
     for i in range(3):
         board.append([" "]*3)
     return board
-
-def make_winning_move(board, mark):
-    free_squares = get_free_squares(board)
-    for i in range(len(free_squares)):
-        square_num = free_squares[i]
-        print(square_num)
-        put_in_board(board, mark, square_num[0] * 3 + square_num[1] + 1)
-        if is_win(board, mark) == True:
-            print("Made a winning move 😎")
-            return True
-        else:
-            board[square_num[0]][square_num[1]] = " "
-
-    return False
     
-def block_opponent(board,mark):
-    #Problem 4 (b): check if X is about to win
-    opponent_squares = check_opponent(board,mark)
-    
-    index_list = []
-    for i in range(len(opponent_squares)):
-        opponent_index = opponent_squares[i][0]*3 + opponent_squares[i][1] + 1
-        index_list.append(opponent_index)
-        
-    # 1,2 or 2,3 exist?
-    # 1,4 exist?
-    # 1,5 exist?
-    check_index_order = []
-    for i in range(len(index_list)+1):
-        check_index_order.append(index_list[i],index_list[i+1])
-        for j in range(1,6):
-            if check_index_order == [j, j+1]:
-                print("next to each other", check_index_order)
-    
-    
-    
-def check_opponent(board,mark):
-    if mark == "0":
-        opponent_mark = "X"
-    else:
-        opponent_mark = "0"
-        
-    opponent_squares = []
-    
-    for i in range(3):
-        for j in range(3):
-            if board[i][j] == opponent_mark: 
-                opponent_square = [i, j]
-                opponent_squares.append(opponent_square)
-    return opponent_squares
-    
+# ==================================================
+# ==================================================      
 if __name__ == '__main__':
     board = make_empty_board()
     print_board_and_legend(board)
 
-    # Problem 1 (c)
+    # Problem 1 (c) - Human player vs human player game
     # move_count = 0
     # while move_count < 9:
     #     if move_count % 2 == 0:
@@ -145,17 +141,22 @@ if __name__ == '__main__':
     #     print("\n")
     #     print_board_and_legend(board) 
 
-    # Problem 2 (c)
+    # Human player vs computer game
+    # Assume human player always starts ==> always uses "X"
     move_count = 0
     while move_count < 9:
         if move_count % 2 == 0:
             input_coord = int(input("Please enter a coordinate for X: "))
             put_in_board(board, "X", input_coord)
         else:
-            make_winning_move(board, "O")
-            make_random_move(board, "O")
-            
-        block_opponent(board,"0")
+            # Problem 4 (a) Implementation
+            O_winning_move = make_winning_move(board, "O")
+            if O_winning_move is None:
+                # Problem 4 (b) Implementation
+                O_blocking_move = block_opponent_win(board, "O")
+                if O_blocking_move is None:
+                    # Problem 2 (c)
+                    make_random_move(board, "O")
 
         # Problem 3 (d)
         if is_win(board, "X") == True:
@@ -169,7 +170,7 @@ if __name__ == '__main__':
             print("Game over! O won.")
             break
 
-        print(get_free_squares(board))
+        # print(get_free_squares(board))
         move_count += 1
         print("\n")
         print_board_and_legend(board)
