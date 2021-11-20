@@ -19,11 +19,8 @@ def get_lead_ind(row):
 def get_row_to_swap(M, start_i):
     '''Return the row that needs to be swapped with the row M[start_i]'''
     row1_lead = get_lead_ind(M[start_i]) # First non-zero index of given row
-    print("row1_lead:", row1_lead)
     lowest_lead = row1_lead # Lowest non-zero index of rows below
-    print("lowest_lead:",lowest_lead)
     row_to_swap = start_i
-    print("row_to_swap:", row_to_swap)
     
     for i in range(1, len(M)-start_i):
         current_lead = get_lead_ind(M[start_i+i])
@@ -47,7 +44,15 @@ def add_rows_coefs(r1, c1, r2, c2):
 
 # Problem 5
 def eliminate(M, row_to_sub, best_lead_ind):
-    pass
+    '''Return M where all the rows below <row_to_sub> have the 
+    values at index <best_lead_ind> eliminated. 
+    Assume best_lead_ind is get_lead_ind(M[row_to_sub])'''
+    for i in range(1, len(M)-row_to_sub): # Number of rows below row_to_sub
+        while M[row_to_sub+i][best_lead_ind] != 0: # Number in column <best_lead_ind>
+            for j in range(len(M[row_to_sub])):
+                M[row_to_sub+i][j] -= M[row_to_sub][j] # Subtract elements of <row_to_sub> from elements of row
+
+    return M
 
 
 # Problem 6
@@ -82,4 +87,15 @@ if __name__ == '__main__':
     r1 = [1, 2, 3, 4]
     r2 = [1, 1, 1, 1]
     print(add_rows_coefs(r1, 2, r2, 2))
+
+    # Problem 5
+    M3 = [[5, 6, 7, 8],
+        [0,0, 1, 1],
+        [0, 0, 5, 2],
+        [0, 0, 7, 0]]
+    row_to_sub = 1
+    best_lead_ind = 2
+    print(eliminate(M3, row_to_sub, best_lead_ind))
+
+
 
