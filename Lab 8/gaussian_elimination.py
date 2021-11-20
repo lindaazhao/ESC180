@@ -37,37 +37,84 @@ def add_rows_coefs(r1, c1, r2, c2):
     row_sum = [0] * len(r1)
 
     for i in range(len(r1)):
-        row_sum[i] = r1[i]*c1 + r2[i]*c2
+        if r2[i] < 0 and c2 < 0:
+            row_sum[i] = r1[i]*c1 + abs(r2[i])*-1*c2
+        else:
+            row_sum[i] = r1[i]*c1 + abs(r2[i])*c2
 
     return row_sum
 
 
 # Problem 5
-def eliminate(M, row_to_sub, best_lead_ind):
+def eliminate(M, row_to_sub, best_lead_ind): # Forward step
     '''Return M where all the rows below <row_to_sub> have the 
     values at index <best_lead_ind> eliminated. 
     Assume best_lead_ind is get_lead_ind(M[row_to_sub])'''
+    rts_lead = abs(M[row_to_sub][best_lead_ind]) # Magnitude of lead coef of row_to_sum
+    rts = M[row_to_sub] # Actual row, row_to_sub
+
     for i in range(1, len(M)-row_to_sub): # Number of rows below row_to_sub
         while M[row_to_sub+i][best_lead_ind] != 0: # Number in column <best_lead_ind>
-            for j in range(len(M[row_to_sub])):
-                M[row_to_sub+i][j] -= M[row_to_sub][j] # Subtract elements of <row_to_sub> from elements of row
-
+            rts_at_bli = M[row_to_sub+i][best_lead_ind]
+            if rts_at_bli > 0: # Row below @ best_lead_ind greater than 0
+                coef = -1
+            else:
+                coef = 1
+            if rts_lead > abs(rts_at_bli): # Must subtract fraction of row_to_sub
+                M[row_to_sub+i] = add_rows_coefs(M[row_to_sub+i], 1, rts, coef*abs(rts_at_bli)/rts_lead)
+            else: # rts_lead < row below @ best_lead_ind
+                if rts_at_bli % rts_lead == 0:
+                    M[row_to_sub+i] = add_rows_coefs(M[row_to_sub+i], 1, rts, coef*abs(rts_at_bli)//rts_lead)
+                else: # rts_at_bli % rts_lead != 0:
+                    M[row_to_sub+i] = add_rows_coefs(M[row_to_sub+i], 1, rts, coef*abs(rts_at_bli)//rts_lead)
+                    M[row_to_sub+i] = add_rows_coefs(M[row_to_sub+i], 1, rts, coef*(abs(rts_at_bli)-abs(M[i][best_lead_ind]))/rts_lead)
     return M
 
 
 # Problem 6
 def forward_step(M):
-    pass
+    for i in range(len(M)):
+        swap_index = get_row_to_swap(M, i)
+        M[swap_index], M[i] = M[i], M[swap_index]
+        eliminate(M, i, get_lead_ind(M[i]))
+    return M
 
 
-# Problem 7
+# Problem 7 # This doesn't work
 def backward_step(M):
-    pass
+    for i in range(1, len(M)):
+        eliminate_back(M, len(M)-i, get_lead_ind(M[len(M)-i]))
+    return M
+
+def eliminate_back(M, row_to_sub, best_lead_ind): # Forward step
+    '''Return M where all the rows above <row_to_sub> have the 
+    values at index <best_lead_ind> eliminated. 
+    Assume best_lead_ind is get_lead_ind(M[row_to_sub])'''
+    rts_lead = abs(M[row_to_sub][best_lead_ind]) # Magnitude of lead coef of row_to_sum
+    rts = M[row_to_sub] # Actual row, row_to_sub
+
+    for i in range(row_to_sub-1, 0, -1): # Number of rows below row_to_sub
+        while M[i][best_lead_ind] != 0: # Number in column <best_lead_ind>
+            rts_at_bli = M[i][best_lead_ind]
+            if rts_at_bli > 0: # Row below @ best_lead_ind greater than 0
+                coef = -1
+            else:
+                coef = 1
+            if rts_lead > abs(rts_at_bli): # Must subtract fraction of row_to_sub
+                M[i] = add_rows_coefs(M[i], 1, rts, coef*abs(rts_at_bli)/rts_lead)
+            else: # rts_lead < row below @ best_lead_ind
+                if rts_at_bli % rts_lead == 0:
+                    M[i] = add_rows_coefs(M[i], 1, rts, coef*abs(rts_at_bli)//rts_lead)
+                else: # rts_at_bli % rts_lead != 0:
+                    M[i] = add_rows_coefs(M[i], 1, rts, coef*abs(rts_at_bli)//rts_lead)
+                    M[i] = add_rows_coefs(M[i], 1, rts, coef*(abs(rts_at_bli)-abs(M[i][best_lead_ind]))/rts_lead)
+    return M
 
 
 # Problem 8
 def solve(M, b):
-    pass
+    forward_step(M)
+    backward_step(M)
 
 
 # Tests ==================================================
@@ -81,7 +128,10 @@ if __name__ == '__main__':
         [0, 0, 5, 2],
         [0, 1, 0, 0]]
     start_i = 1
-    print(get_row_to_swap(M1, start_i))
+    swap = get_row_to_swap(M1, start_i)
+    print(swap)
+    M1[swap], M1[start_i] = M1[start_i], M1[swap]
+    print(M1)
 
     # Problem 4
     r1 = [1, 2, 3, 4]
@@ -96,6 +146,14 @@ if __name__ == '__main__':
     row_to_sub = 1
     best_lead_ind = 2
     print(eliminate(M3, row_to_sub, best_lead_ind))
+
+    M4 = [[0, 0, 1, 0, 2], [1, 0, 2, 3, 4], [3, 0, 4, 2, 1], [1, 0, 1, 1, 2]]
+    print(forward_step(M4))
+
+    M5 = [[1, -2, 3, 22], [ 3, 10, 1, 314], [ 1, 5, 3, 92]]
+    print(forward_step(M5))
+    print(backward_step(M5))
+
 
 
 
