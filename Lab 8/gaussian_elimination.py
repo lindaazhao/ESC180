@@ -49,7 +49,7 @@ def eliminate(M, row_to_sub, best_lead_ind): # Forward step
     '''Return M where all the rows below <row_to_sub> have the 
     values at index <best_lead_ind> eliminated. 
     Assume best_lead_ind is get_lead_ind(M[row_to_sub])'''
-    rts_lead = M[row_to_sub][best_lead_ind] # Magnitude of lead coef of row_to_sum
+    rts_lead = M[row_to_sub][best_lead_ind] # Magnitude of lead coef of row_to_sub
     rts = M[row_to_sub] # Actual row, row_to_sub
 
     for i in range(1, len(M)-row_to_sub): # Number of rows below row_to_sub
@@ -68,42 +68,91 @@ def forward_step(M):
     return M
 
 
-# Problem 7 # This doesn't work
+# Problem 7
 def backward_step(M):
-    for i in range(1, len(M)):
-        eliminate_back(M, len(M)-i, get_lead_ind(M[len(M)-i]))
+    for i in range(len(M)-1, 0, -1):
+        eliminate_back(M, i, get_lead_ind(M[i]))
     return M
 
-def eliminate_back(M, row_to_sub, best_lead_ind): # Forward step
+
+def eliminate_back(M, row_to_sub, best_lead_ind): # Backward step, reverse ranges
     '''Return M where all the rows above <row_to_sub> have the 
     values at index <best_lead_ind> eliminated. 
     Assume best_lead_ind is get_lead_ind(M[row_to_sub])'''
-    rts_lead = abs(M[row_to_sub][best_lead_ind]) # Magnitude of lead coef of row_to_sum
+    rts_lead = M[row_to_sub][best_lead_ind] # Magnitude of lead coef of row_to_sub
     rts = M[row_to_sub] # Actual row, row_to_sub
 
-    for i in range(row_to_sub-1, 0, -1): # Number of rows below row_to_sub
+    for i in range(row_to_sub-1, -1, -1): # Count up rows from row_to_sub
         while M[i][best_lead_ind] != 0: # Number in column <best_lead_ind>
-            rts_at_bli = M[i][best_lead_ind]
-            if rts_at_bli > 0: # Row below @ best_lead_ind greater than 0
-                coef = -1
+            row_at_bli = M[i][best_lead_ind]
+            M[i] = add_rows_coefs(M[i], 1, rts, -1*row_at_bli/rts_lead)
+    return M
+
+def divide_by_leading_coef(M):
+    for i in range(len(M)):
+        leading_coef = M[i][get_lead_ind(M[i])]
+        for j in range(len(M[i])):
+            if M[i][j] / leading_coef == int(M[i][j] / leading_coef):
+                M[i][j] = int(M[i][j] / leading_coef)
             else:
-                coef = 1
-            if rts_lead > abs(rts_at_bli): # Must subtract fraction of row_to_sub
-                M[i] = add_rows_coefs(M[i], 1, rts, coef*abs(rts_at_bli)/rts_lead)
-            else: # rts_lead < row below @ best_lead_ind
-                if rts_at_bli % rts_lead == 0:
-                    M[i] = add_rows_coefs(M[i], 1, rts, coef*abs(rts_at_bli)//rts_lead)
-                else: # rts_at_bli % rts_lead != 0:
-                    M[i] = add_rows_coefs(M[i], 1, rts, coef*abs(rts_at_bli)//rts_lead)
-                    M[i] = add_rows_coefs(M[i], 1, rts, coef*(abs(rts_at_bli)-abs(M[i][best_lead_ind]))/rts_lead)
+                M[i][j] /= leading_coef
     return M
 
 
 # Problem 8
 def solve(M, b):
+    m = len(M) # of rows in M
+    n = len(M[0]) # of columns in M
+
+    for i in range(len(b)): # Turn into augmented matrix
+        M[i].append(b[i])
+
+    # Turn into reduced normal form [R|d]
     forward_step(M)
     backward_step(M)
+    divide_by_leading_coef(M)
+    
+    rank = 0
+    for i in range(len(M)):
+        if get_lead_ind(M[i]) < len(M[i]):
+            rank += 1
+            print(rank)
 
+    # Reduced vector b
+    d = [0] * len(b)
+    for i in range(len(M)):
+        d[i] = M[i][-1]
+
+    x = [0] * n
+
+    if rank < m and rank < n: # Not full rank
+        if n == m:
+            for i in range(1, m-rank+1):
+                if d[-i] != 0:
+                    return "No solutions" 
+            for j in range(n): # Infinite solutions, but may be some leading variables
+                if j < n:
+                    x[j] = d[j]
+                else:
+                    x[j] = "any"
+        pass # 0 or infinite solutions
+    elif m == n: # Square Matrix, m == n == rank
+        for i in range(len(x)): # Find solution for x
+            x[i] = d[i]
+    elif m > n: # Tall & Thin Matrix, n == rank
+        for i in range(1, m-rank+1):
+            if d[-i] != 0:
+                return "No solutions"
+        for i in range(len(x)): # Find solution for x
+            x[i] = d[i]
+    elif n > m: # Short and Wide Matrix, m == rank
+        for i in range(len(x)):
+            if i < m:
+                x[i] = d[i]
+            else:
+                x[i] = "any"
+    return x
+    
 
 # Tests ==================================================
 if __name__ == '__main__':
@@ -135,12 +184,23 @@ if __name__ == '__main__':
     best_lead_ind = 2
     print(eliminate(M3, row_to_sub, best_lead_ind))
 
+    # Problem 6
     M4 = [[0, 0, 1, 0, 2], [1, 0, 2, 3, 4], [3, 0, 4, 2, 1], [1, 0, 1, 1, 2]]
     print(forward_step(M4))
 
+    # Problem 7
     M5 = [[1, -2, 3, 22], [ 3, 10, 1, 314], [ 1, 5, 3, 92]]
     print(forward_step(M5))
     print(backward_step(M5))
+    print(divide_by_leading_coef(M5))
+    # print(solve(M5, [2, 3, 4]))
+
+    M6 = [[0, 2], [3, -2]]
+    b = [4, 5]
+    print(solve(M6, b))
+
+
+
 
 
 
