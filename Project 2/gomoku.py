@@ -113,9 +113,9 @@ def search_max(board):
             if board[y][x] == " ": # Square is empty
                 if move_y == 0 and move_x == 0:
                     if board[0][0] != " ":
-                        move_y = y
+                        move_y = y # Change default move if (0, 0) is not empty
                         move_x = x
-                board[y][x] = "b"
+                board[y][x] = "b" # Calculate hypothetical score w move (y, x)
                 if score(board) > max_score:
                     max_score = score(board) # New max_score to beat
                     move_y = y
@@ -135,10 +135,9 @@ def is_win(board):
         return "White won"
     elif black_open_win > 0 or black_semi_open_win > 0 or black_closed_win > 0:
         return "Black won"
-    else:
-        if is_full(board):
-            return "Draw"
-        return "Continue playing"
+    elif is_full(board):
+        return "Draw"
+    return "Continue playing"
 
 
 # ======================================================================
@@ -393,7 +392,7 @@ def easy_testset_for_main_functions():
     test_search_max()
 
 # ======================================================================
-# More Tests to ensure things are detecting correctly
+# More Tests
 def some_tests():
     board = make_empty_board(8)
 
@@ -511,11 +510,5 @@ def some_tests():
 
 
 if __name__ == '__main__':
-    # play_gomoku(8)
-    board = make_empty_board(8)
-    # easy_testset_for_main_functions()
-    put_seq_on_board(board, 0, 3, 1, 0, 5, 'w')
-    put_seq_on_board(board, 5, 3, 1, 1, 1, 'b')
-    print_board(board)
-    print(is_win(board))
+    play_gomoku(8)
     
