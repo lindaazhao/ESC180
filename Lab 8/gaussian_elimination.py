@@ -123,6 +123,7 @@ def solve(M, b):
     for i in range(len(M)):
         d[i] = M[i][-1]
 
+    # Solution vector
     x = [0] * n
 
     if rank < m and rank < n: # Not full rank
@@ -130,7 +131,7 @@ def solve(M, b):
             if d[-i] != 0:
                 return "No solutions" 
         return "Infinite Solutions"
-        
+
     elif m == n: # Square Matrix, m == n == rank
         for i in range(len(x)): # Find solution for x
             x[i] = d[i]
@@ -142,6 +143,7 @@ def solve(M, b):
             x[i] = d[i]
     elif n > m: # Short and Wide Matrix, m == rank
         return "Infinite solutions"
+    
     return x
     
 
