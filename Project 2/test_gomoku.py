@@ -31,7 +31,6 @@ def is_bounded(board, y_end, x_end, length, d_y, d_x):
 
     # Check if sequence is incomplete
     seq_colour = board[start_y][start_x]
-    # print("Start:", start_seq, "End:", end_seq)
     if start_seq == seq_colour or end_seq == seq_colour:
             return None
     elif start_seq == " " and end_seq == " ":
@@ -268,9 +267,9 @@ if __name__ == '__main__':
     # board[3][4] = 'w'
     # print_board(board)
     # print(is_bounded(board, 6, 7, 3, 1, 1))
-    board = [[' ', 'b', ' ', 'w', 'b', ' ', ' ', 'w'], [' ', 'b', ' ', 'b', 'w', 'b', ' ', 'w'], ['b', 'w', 'b', 'w', 'b', 'w', ' ', 'w'], [' ', 'w', ' ', 'b', 'w', 'b', ' ', 'w'], ['w', ' ', ' ', 'w', 'b', 'w', ' ', 'w'], [' ', ' ', ' ', 'w', ' ', 'b', 'b', 'w'], [' ', 'w', 'b', 'w', ' ', 'b', 'w', ' '], [' ', 'b', 'w', 'w', 'w', 'b', ' ', 'w']]
+    board =  [['w', ' ', ' ', ' ', 'b', 'b', ' ', ' '], [' ', 'w', ' ', ' ', 'b', 'b', ' ', ' '], ['w', 'w', ' ', ' ', 'b', 'b', ' ', 'w'], ['w', 'b', 'b', 'b', 'b', 'b', ' ', ' '], ['w', ' ', 'b', ' ', ' ', 'b', 'w', 'w'], ['w', ' ', 'b', ' ', ' ', 'b', ' ', ' '], ['w', 'w', 'b', ' ', ' ', ' ', 'w', 'b'], ['b', 'w', 'b', ' ', 'b', 'b', 'b', ' ']]
     analysis(board)
 
-    board = make_empty_board(8)
-    put_seq_on_board(board, 3, 3, 1, -1, 3, 'b')
-    print(detect_rows(board, 'b', 3))
+    # board = make_empty_board(8)
+    # put_seq_on_board(board, 3, 3, 1, -1, 3, 'b')
+    # print(detect_rows(board, 'b', 3))

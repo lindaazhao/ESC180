@@ -86,7 +86,8 @@ def detect_rows(board, col, length):
         open_seq_count += open_0_1 + open_1_1 + open_1_neg1
         semi_open_seq_count += semi_open_0_1 + semi_open_1_1 + semi_open_1_neg1
 
-    for x in range(len(board[0])): 
+    for x in range(len(board[0])):
+        open_1_0, semi_open_1_0, open_1_1, semi_open_1_1, open_1_neg1, semi_open_1_neg1 = 0, 0, 0, 0, 0, 0 
         # Check every column 
         open_1_0, semi_open_1_0 = detect_row(board, col, 0, x, length, 1, 0)
         # Check upper right half of 1,1 diagonals
