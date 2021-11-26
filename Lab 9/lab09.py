@@ -39,23 +39,19 @@ def top10_freq(freq):
         inv_freq[value] = key # Keeps replacing the value at "1"
     
     sorted_inv_freq_list = sorted(inv_freq.items())
+    
+    return sorted_inv_freq_list[-1:-10:-1]
 
-    if len(sorted_inv_freq_list) < 10:
-        for i in range(10-len(sorted_inv_freq_list)):
-            # find what the smallest key in inv_freq is
-            # add more words with that same key from freq until sorted_inv_freq_list is 10 elements long
-            pass
-        
-    print(sorted(inv_freq.items()))
+
 
 if __name__ == '__main__':
     # Problem 1 (a)
     freq = word_counts("text.txt")
     print(freq)
-    top10_freq(freq)
 
-
-
-    # Problem 2
+    # Problem 1 (b)
     print(top10([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]))
+
+    # Problem 1 (c)
+    print(top10_freq(freq))
 

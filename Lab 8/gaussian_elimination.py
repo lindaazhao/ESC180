@@ -53,7 +53,7 @@ def eliminate(M, row_to_sub, best_lead_ind): # Forward step
     rts = M[row_to_sub] # Actual row, row_to_sub
 
     for i in range(1, len(M)-row_to_sub): # Number of rows below row_to_sub
-        while M[row_to_sub+i][best_lead_ind] != 0: # Number in column <best_lead_ind>
+        if M[row_to_sub+i][best_lead_ind] != 0: # Number in column <best_lead_ind>
             row_at_bli = M[row_to_sub+i][best_lead_ind]
             M[row_to_sub+i] = add_rows_coefs(M[row_to_sub+i], 1, rts, -1*row_at_bli/rts_lead)
     return M
@@ -87,6 +87,7 @@ def eliminate_back(M, row_to_sub, best_lead_ind): # Backward step, reverse range
             row_at_bli = M[i][best_lead_ind]
             M[i] = add_rows_coefs(M[i], 1, rts, -1*row_at_bli/rts_lead)
     return M
+
 
 def divide_by_leading_coef(M):
     for i in range(len(M)):
@@ -159,7 +160,6 @@ if __name__ == '__main__':
         [0, 1, 0, 0]]
     start_i = 1
     swap = get_row_to_swap(M1, start_i)
-    print(swap)
     M1[swap], M1[start_i] = M1[start_i], M1[swap]
     print(M1)
 
@@ -182,7 +182,7 @@ if __name__ == '__main__':
     print(forward_step(M4))
 
     # Problem 7
-    M5 = [[1, -2, 3, 22], [ 3, 10, 1, 314], [ 1, 5, 3, 92]]
+    M5 = [[1, -2, 3, 22], [3, 10, 1, 314], [1, 5, 3, 92]]
     print(forward_step(M5))
     print(backward_step(M5))
     print(divide_by_leading_coef(M5))
