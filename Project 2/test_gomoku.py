@@ -18,19 +18,22 @@ def is_bounded(board, y_end, x_end, length, d_y, d_x):
     start_y = y_end - d_y*(length-1)
     start_x = x_end - d_x*(length-1)
 
-    if start_y - d_y < 0 or start_x - d_x < 0 or start_x - d_x >= len(board[0]): # Starts at edge in relevant direction
+    # Check if sequence starts at board edge in relevant direction
+    if start_y - d_y < 0 or start_x - d_x < 0 or start_x - d_x >= len(board[0]): 
         start_seq = "E"
-    else:
+    else: # If not at board edge
         start_seq = board[start_y - d_y][start_x - d_x]
 
-    if y_end + d_y > len(board) - 1 or x_end + d_x > len(board[0]) - 1: # Edge
+    if y_end + d_y >= len(board) or x_end + d_x >= len(board[0]) or x_end + d_x < 0: # Edge
         end_seq = "E"
     else:
         end_seq = board[y_end + d_y][x_end + d_x]
 
-    print("IS BOUNDED, Start:", start_seq, "End:", end_seq) # TEST, remove this after
-
-    if start_seq == " " and end_seq == " ":
+    # Check if sequence is incomplete
+    seq_colour = board[start_y][start_x]
+    if start_seq == seq_colour or end_seq == seq_colour:
+            return None
+    elif start_seq == " " and end_seq == " ":
         return "OPEN"
     elif start_seq == " " or end_seq == " ":
         return "SEMIOPEN"
@@ -86,7 +89,8 @@ def detect_rows(board, col, length):
         open_seq_count += open_0_1 + open_1_1 + open_1_neg1
         semi_open_seq_count += semi_open_0_1 + semi_open_1_1 + semi_open_1_neg1
 
-    for x in range(len(board[0])): 
+    for x in range(len(board[0])):
+        open_1_0, semi_open_1_0, open_1_1, semi_open_1_1, open_1_neg1, semi_open_1_neg1 = 0, 0, 0, 0, 0, 0 
         # Check every column 
         open_1_0, semi_open_1_0 = detect_row(board, col, 0, x, length, 1, 0)
         # Check upper right half of 1,1 diagonals
@@ -235,6 +239,14 @@ def test_search_max():
     else:
         print("TEST CASE for search_max FAILED")
 
+def analysis(board):
+    for c, full_name in [["b", "Black"], ["w", "White"]]:
+        print("%s stones" % (full_name))
+        for i in range(2, 6):
+            open_rows, semi_open = detect_rows(board, c, i)
+            print("Open rows of length %d: %d" % (i, open_rows))
+            print("Semi-open rows of length %d: %d" % (i, semi_open))
+
 def easy_testset_for_main_functions():
     test_is_empty()
     test_is_bounded()
@@ -243,5 +255,21 @@ def easy_testset_for_main_functions():
     test_search_max()
 
 if __name__ == '__main__':
-    test_search_max()
+    board = make_empty_board(8)
+    # put_seq_on_board(board, 1, 1, 1, 1, 7, 'w')
+    # board[0][0] = 'b'
+    # print_board(board)
+    # print(is_bounded(board, 6, 6, 5, 1, 1))
+    # put_seq_on_board(board, 5, 6, 1, -1, 3, 'b')
+    # board[4][7] = 'w'
+    # print(is_bounded(board, 7, 4, 3, 1, -1))
+    # put_seq_on_board(board, 4, 5, 1, 1, 3, 'b')
+    # board[3][4] = 'w'
+    # print_board(board)
+    # print(is_bounded(board, 6, 7, 3, 1, 1))
+    board =  [['w', ' ', ' ', ' ', 'b', 'b', ' ', ' '], [' ', 'w', ' ', ' ', 'b', 'b', ' ', ' '], ['w', 'w', ' ', ' ', 'b', 'b', ' ', 'w'], ['w', 'b', 'b', 'b', 'b', 'b', ' ', ' '], ['w', ' ', 'b', ' ', ' ', 'b', 'w', 'w'], ['w', ' ', 'b', ' ', ' ', 'b', ' ', ' '], ['w', 'w', 'b', ' ', ' ', ' ', 'w', 'b'], ['b', 'w', 'b', ' ', 'b', 'b', 'b', ' ']]
+    analysis(board)
 
+    # board = make_empty_board(8)
+    # put_seq_on_board(board, 3, 3, 1, -1, 3, 'b')
+    # print(detect_rows(board, 'b', 3))
