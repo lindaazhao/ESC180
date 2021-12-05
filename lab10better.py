@@ -57,6 +57,23 @@ def middle_side_rec(L1):
 
     return new_list
 
+##5
+def is_balanced(s):
+    left_bracket_count = 0
+    right_bracket_count = 0
+
+    slist = list(s)
+    for i in range(len(slist)):
+        if "(" == slist[i]:
+            left_bracket_count += 1
+        if ")" == slist[i]:
+            right_bracket_count += 1
+    if right_bracket_count == left_bracket_count:
+        return ("True")
+    else:
+        return("False")
+
+
 if __name__ == "__main__":
     # print(power(2,3))
 
@@ -69,6 +86,8 @@ if __name__ == "__main__":
 
     L = []
     print(middle_side_rec([4,2,1,3,5]))
+
+    print(is_balanced("(()(())"))
 
 
 
