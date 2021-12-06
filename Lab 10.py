@@ -31,6 +31,7 @@ def reverse_rec(L):
             return [L[len(L)-1]] + reverse_rec(L[1:len(L)-1]) + [L[0]]
 
 print(reverse_rec([1, 2, 3, 4, 5, 6, 7]))
+        
 
 # Problem 4
 def zigzag(L):
@@ -43,4 +44,23 @@ def zigzag(L):
 
 print(zigzag([1, 2, 3, 4, 5, 6, 7, 8, 9]))
 
+
 # Problem 5
+def is_balanced(s):
+    whitelist = set('()')
+    brackets = ''.join(filter(whitelist.__contains__, s))
+    print(brackets)
+
+    if brackets == '()':
+        return True
+    # elif brackets == '':
+    #     return True
+    else:
+        if brackets.find('()') == -1:
+            return False
+        brackets = brackets[0:brackets.find('()')] + brackets[brackets.find('()')+2:]
+        return is_balanced(brackets)
+
+
+print(is_balanced("(well (I think), recursion works like that (as far as I know)"))
+print(is_balanced("(()(()))"))
