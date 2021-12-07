@@ -52,37 +52,72 @@ def build_semantic_descriptors_from_files(filenames):
     sentences = []
     for filename in filenames:
         with open(filename, "r", encoding="UTF-8") as f:
-            text = f.read()
-            for punc in punctuation:
-                text = text.replace(punc, " ")
-            listofsentences = re.split('[?.!]', text)
+            text = f.read().lower()
+        for punc in punctuation:
+            text = text.replace(punc, " ")
+        listofsentences = re.split('[?.!]', text)
 
-            for i in listofsentences:
-                sentences.append(i.split())
+        for i in listofsentences:
+            sentences.append(i.split())
 
     return build_semantic_descriptors(sentences)
-
-some_descriptors = build_semantic_descriptors_from_files(["War and Peace.txt"])
-print(some_descriptors["the"])
 
 
 def most_similar_word(word, choices, semantic_descriptors, similarity_fn):
     '''Return the element of <choices> which has the largest semantic similarity to <word>'''
     mostsimilarword = ""
-    mostsimilar = 0
+    mostsimilar = -1
 
-    worddesc = semantic_descriptors[word]
     for choice in choices:
-        choicedesc = semantic_descriptors[choice]
+        try:
+            worddesc = semantic_descriptors[word]
+            choicedesc = semantic_descriptors[choice]
+        except:
+            return -1
 
-        similarity = similarity_fn(worddesc, choicedesc) 
+        similarity = similarity_fn(worddesc, choicedesc)
         if similarity > mostsimilar:
             mostsimilarword = choice
             mostsimilar = similarity
-    
+
+    # if word in semantic_descriptors:
+    #     worddesc = semantic_descriptors[word]
+    #     for choice in choices:
+    #         if choice in semantic_descriptors:
+    #             choicedesc = semantic_descriptors[choice]
+
+    #             similarity = similarity_fn(worddesc, choicedesc)
+    #             if similarity > mostsimilar:
+    #                 mostsimilarword = choice
+    #                 mostsimilar = similarity
+    # else:
+    #     return -1
+
     return mostsimilarword
 
 
-
 def run_similarity_test(filename, semantic_descriptors, similarity_fn):
-    pass
+    '''Return the percentage of questions on which most_similar_word() guesses the answer correctly'''
+    correct = 0
+
+    with open(filename, "r", encoding="UTF-8") as f:
+        tests = f.read().lower().split("\n")
+
+    for test in tests:
+        question = test[0]
+        answer = test[1]
+        choices = test[2:]
+        if most_similar_word(question, choices, semantic_descriptors, similarity_fn) == answer:
+            correct += 1
+
+    return 100 * correct / len(tests)
+
+
+# Tests
+if __name__ == '__main__':
+    some_descriptors = build_semantic_descriptors_from_files(["War and Peace.txt", "Swann's Way.txt"])
+    # print(some_descriptors["authentic"])
+    # print(some_descriptors["the"])
+    # print(most_similar_word("authentic", ["genuine", "false"], some_descriptors, cosine_similarity))
+
+    # print(run_similarity_test("Tests.txt", some_descriptors, cosine_similarity))
