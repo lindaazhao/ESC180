@@ -48,6 +48,7 @@ def build_semantic_descriptors(sentences):
 
 
 def build_semantic_descriptors_from_files(filenames):
+    '''Return a dictionary of the semantic descriptors of all the words in filenames'''
     punctuation = [",", "-", "--", ":", ";", "\n"]
     sentences = []
     for filename in filenames:
@@ -64,34 +65,21 @@ def build_semantic_descriptors_from_files(filenames):
 
 
 def most_similar_word(word, choices, semantic_descriptors, similarity_fn):
-    '''Return the element of <choices> which has the largest semantic similarity to <word>'''
-    mostsimilarword = ""
+    '''Return the element of <choices> which has the largest semantic similarity to <word>. 
+    Return the first choice if similarity cannot be computed'''
+    mostsimilarword = choices[0]
     mostsimilar = -1
 
-    for choice in choices:
-        try:
-            worddesc = semantic_descriptors[word]
-            choicedesc = semantic_descriptors[choice]
-        except:
-            return -1
+    if word in semantic_descriptors:
+        worddesc = semantic_descriptors[word]
+        for choice in choices:
+            if choice in semantic_descriptors:
+                choicedesc = semantic_descriptors[choice]
 
-        similarity = similarity_fn(worddesc, choicedesc)
-        if similarity > mostsimilar:
-            mostsimilarword = choice
-            mostsimilar = similarity
-
-    # if word in semantic_descriptors:
-    #     worddesc = semantic_descriptors[word]
-    #     for choice in choices:
-    #         if choice in semantic_descriptors:
-    #             choicedesc = semantic_descriptors[choice]
-
-    #             similarity = similarity_fn(worddesc, choicedesc)
-    #             if similarity > mostsimilar:
-    #                 mostsimilarword = choice
-    #                 mostsimilar = similarity
-    # else:
-    #     return -1
+                similarity = similarity_fn(worddesc, choicedesc)
+                if similarity > mostsimilar:
+                    mostsimilarword = choice
+                    mostsimilar = similarity
 
     return mostsimilarword
 
@@ -116,8 +104,6 @@ def run_similarity_test(filename, semantic_descriptors, similarity_fn):
 # Tests
 if __name__ == '__main__':
     some_descriptors = build_semantic_descriptors_from_files(["War and Peace.txt", "Swann's Way.txt"])
-    # print(some_descriptors["authentic"])
-    # print(some_descriptors["the"])
-    # print(most_similar_word("authentic", ["genuine", "false"], some_descriptors, cosine_similarity))
+    print(most_similar_word("authentic", ["genuine", "false"], some_descriptors, cosine_similarity))
 
-    # print(run_similarity_test("Tests.txt", some_descriptors, cosine_similarity))
+    print(run_similarity_test("Tests.txt", some_descriptors, cosine_similarity))
