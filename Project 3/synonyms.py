@@ -16,17 +16,15 @@ def norm(vec):
 def cosine_similarity(vec1, vec2):
     '''Return cosine similarity between sparse vectors vec1 and vec2, stored as dictionaries.'''
     dot_prod = 0
-    if len(vec1) != len(vec2):
-        return -1
 
-    for i in range(len(vec1)):
-        for j in range(len(vec2)):
-            if list(vec1.keys())[i] == list(vec2.keys())[j]:
-                dot_prod += list(vec1.values())[i] * list(vec2.values())[j]
+    for key1 in vec1:
+        for key2 in vec2:
+            if key1 == key2:
+                dot_prod += vec1[key1] * vec2[key2]
 
-    return dot_prod / (norm(vec1) * norm(vec2))
-
-print(cosine_similarity({"a": 1, "b": 2, "c": 3}, {"b": 4, "c": 5, "d": 6}))
+    if norm(vec1) != 0 and norm(vec2) != 0:
+        return dot_prod / (norm(vec1) * norm(vec2))
+    return -1
 
 
 def build_semantic_descriptors(sentences):
@@ -37,7 +35,7 @@ def build_semantic_descriptors(sentences):
         unique_words = set(sentence) # Get rid of duplicate words in a sentence
         for word in unique_words:
             if word not in descriptors:
-                descriptors[word] = {}
+                descriptors[word] = {} # Make new dictionary
             for i in unique_words: # Inside key
                 if i != word:
                     if i in descriptors[word]:
@@ -54,12 +52,13 @@ def build_semantic_descriptors_from_files(filenames):
     for filename in filenames:
         with open(filename, "r", encoding="UTF-8") as f:
             text = f.read().lower()
+        
         for punc in punctuation:
             text = text.replace(punc, " ")
-        listofsentences = re.split('[?.!]', text)
+        listofsentences = re.split('[?.!]', text) # Split text into sentences
 
         for i in listofsentences:
-            sentences.append(i.split())
+            sentences.append(i.split()) # Split sentence into words
 
     return build_semantic_descriptors(sentences)
 
@@ -67,7 +66,7 @@ def build_semantic_descriptors_from_files(filenames):
 def most_similar_word(word, choices, semantic_descriptors, similarity_fn):
     '''Return the element of <choices> which has the largest semantic similarity to <word>. 
     Return the first choice if similarity cannot be computed'''
-    mostsimilarword = choices[0]
+    mostsimilarword = choices[0] # Default choice
     mostsimilar = -1
 
     if word in semantic_descriptors:
@@ -88,13 +87,14 @@ def run_similarity_test(filename, semantic_descriptors, similarity_fn):
     '''Return the percentage of questions on which most_similar_word() guesses the answer correctly'''
     correct = 0
 
-    with open(filename, "r", encoding="UTF-8") as f:
-        tests = f.read().lower().split("\n")
+    with open(filename, "r", encoding="latin1") as f:
+        tests = f.read().lower().strip("\n").split("\n")
 
     for test in tests:
-        question = test[0]
-        answer = test[1]
-        choices = test[2:]
+        items = test.split() # Split each test into an array containing the words in the test
+        question = items[0]
+        answer = items[1]
+        choices = items[2:]
         if most_similar_word(question, choices, semantic_descriptors, similarity_fn) == answer:
             correct += 1
 
@@ -103,7 +103,15 @@ def run_similarity_test(filename, semantic_descriptors, similarity_fn):
 
 # Tests
 if __name__ == '__main__':
-    some_descriptors = build_semantic_descriptors_from_files(["War and Peace.txt", "Swann's Way.txt"])
-    print(most_similar_word("authentic", ["genuine", "false"], some_descriptors, cosine_similarity))
+    import timeit
 
-    print(run_similarity_test("Tests.txt", some_descriptors, cosine_similarity))
+    start = timeit.default_timer()
+
+    descriptors = build_semantic_descriptors_from_files(["War and Peace.txt", "Swann's Way.txt"])
+    # print(most_similar_word("authentic", ["genuine", "false"], descriptors, cosine_similarity))
+
+    print(run_similarity_test("Tests.txt", descriptors, cosine_similarity))
+
+    stop = timeit.default_timer()
+
+    print('Time: ', stop - start)  
